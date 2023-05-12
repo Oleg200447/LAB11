@@ -14,7 +14,7 @@
 #define CONTINUE 1
 #define EXIT 0
 
-#define MAX_PX 10
+#define MAX_PX 100
 #define MIN_PX 1
 
 #define MEMORY_MISTAKE 1

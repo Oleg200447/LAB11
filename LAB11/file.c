@@ -30,31 +30,12 @@ char* inputFileName()
 	if (file_name == NULL)
 		exit(MEMORY_MISTAKE);
 
-	do {
-		printf("Input name of file:");
-		gets_s(file_name, KB);
-		system("cls");
-		rewind(stdin);
-	} while ((int)strlen(file_name) < 1);
+	printf("Input file name:");
+	scanf_s("%s", file_name, KB);
 
-	int size = (int)strlen(file_name);
+	char format[] = ".bmp";
 
-	char* format = calloc(FORMAT_SIZE, sizeof(char));
-	if (format == NULL)
-		exit(MEMORY_MISTAKE);
-	format = ".bmp";
-
-	for (int i = size; i < size + FORMAT_SIZE; i++)
-	{
-		*(file_name + i) = format[i - size];
-		*(file_name + i + 1) = '\0';
-	}
-
-	char * storer = (char*)realloc(file_name,( size+FORMAT_SIZE+NULL_SYMBOL) * sizeof(char));
-	if (storer != NULL)
-	{
-		file_name = storer;
-	}
+	strcat(file_name, format);
 
 	return file_name;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #pragma pack (push,1)
+
 typedef struct BITMAPFILEHEADER {
 	unsigned char Signature[2];
 	unsigned int FileSize;

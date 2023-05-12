@@ -15,7 +15,7 @@
 #define PIXEL_8 8
 #define PIXEL_24 24
 
-void makePictureNegative(Picture* picture, RGBQUAD** palitr)
+void makePictureNegative(const Picture* picture, RGBQUAD** palitr)
 {
 	switch (picture->info.BitCount)
 	{
@@ -32,12 +32,12 @@ void makePictureNegative(Picture* picture, RGBQUAD** palitr)
 
 	case PIXEL_24:
 
-		for (unsigned int i = 0; i < (picture)->info.Height; i++)
-			for (unsigned int j = 0; j < (picture)->info.Width; j++)
+		for (unsigned int i = 0; i < picture->info.Height; i++)
+			for (unsigned int j = 0; j < picture->info.Width; j++)
 			{
-				(picture)->data[i][j].blue = MAX_ID - (picture)->data[i][j].blue;
-				(picture)->data[i][j].green = MAX_ID - (picture)->data[i][j].green;
-				(picture)->data[i][j].red = MAX_ID - (picture)->data[i][j].red;
+				picture->data[i][j].blue = MAX_ID - picture->data[i][j].blue;
+				picture->data[i][j].green = MAX_ID - picture->data[i][j].green;
+				picture->data[i][j].red = MAX_ID - picture->data[i][j].red;
 			}
 
 		break;
@@ -46,7 +46,7 @@ void makePictureNegative(Picture* picture, RGBQUAD** palitr)
 	}
 }
 
-void makePictureWhiteAndBlack(Picture* picture, RGBQUAD** palitr)
+void makePictureWhiteAndBlack(const Picture* picture, RGBQUAD** palitr)
 {
 	switch (picture->info.BitCount)
 	{
@@ -82,19 +82,11 @@ void makePictureWhiteAndBlack(Picture* picture, RGBQUAD** palitr)
 				int b = (int)picture->data[i][j].blue;
 				int g = (int)picture->data[i][j].green;
 				int r = (int)picture->data[i][j].red;
-
-				if ((b + g + r) / 3 > MAX_ID / 2)
-				{
-					picture->data[i][j].blue = MAX_ID;
-					picture->data[i][j].green = MAX_ID;
-					picture->data[i][j].red = MAX_ID;
-				}
-				else
-				{
-					picture->data[i][j].blue = MIN_ID;
-					picture->data[i][j].green = MIN_ID;
-					picture->data[i][j].red = MIN_ID;
-				}
+			
+				picture->data[i][j].blue = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+				picture->data[i][j].green = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+				picture->data[i][j].red = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+				
 			}
 		break;
 	default:
@@ -127,13 +119,18 @@ void makeMedianFiltration(Picture* picture, int x_time, RGBQUAD* palitr)
 			*(temp_mas_palitr + i) = (unsigned char*)calloc(picture->info.Width - 2, sizeof(unsigned char));
 
 			if (*(temp_mas_palitr + i) == NULL)
+			{
+				free(temp_mas_palitr);
+				freePicture(&picture);
+				free(palitr);
 				exit(MEMORY_MISTAKE);
+			}
 		}
 
 		for (int s = 0; s < x_time; s++)
 		{
-			for (unsigned int i = 1; i < (picture)->info.Height - 1; i++)
-				for (unsigned int j = 1; j < (picture)->info.Width - 1; j++)
+			for (unsigned int i = 1; i < picture->info.Height - 1; i++)
+				for (unsigned int j = 1; j < picture->info.Width - 1; j++)
 				{
 
 					int sum_b = 0;
@@ -172,13 +169,14 @@ void makeMedianFiltration(Picture* picture, int x_time, RGBQUAD* palitr)
 					temp_mas_palitr[i-1][j-1] = new_id;
 				}
 
-			for (unsigned int i = 1; i < (picture)->info.Height - 1; i++)
-				for (unsigned int j = 1; j < (picture)->info.Width - 1; j++)
+			for (unsigned int i = 1; i < picture->info.Height - 1; i++)
+				for (unsigned int j = 1; j < picture->info.Width - 1; j++)
 				{
 					picture->pixel_8[i][j] = temp_mas_palitr[i - 1][j - 1];
 				}
 		}
-					
+			
+		free(temp_mas_palitr);
 		break;
 
 	case PIXEL_24:
@@ -237,20 +235,21 @@ void makeMedianFiltration(Picture* picture, int x_time, RGBQUAD* palitr)
 		{
 			free(temp_mas[i]);
 		}
+		free(temp_mas);
 		break;
 	default:
 		break;
 	}
 }
 
-void makeGammaCorrection(Picture* picture, int gamma_value, RGBQUAD** palitr)
+void makeGammaCorrection(const Picture* picture, int gamma_value, RGBQUAD** palitr)
 {
 	double mas_values[SIZE_OF_PALITR]={'\0'};
 
 	for (int i = 0; i < SIZE_OF_PALITR; i++)
 	{
-		double sqrt_number = sqrt((double)((double)i / MAX_ID), gamma_value);
-		mas_values[i] =(double) (sqrt_number* MAX_ID);
+		double sqrt_number = sqrt((i / MAX_ID), gamma_value);
+		mas_values[i] =(sqrt_number* MAX_ID);
 	}
 
 	switch (picture->info.BitCount)
