@@ -56,7 +56,7 @@ void chekerForFileInFolder(char** file_name)
 	fclose(file);
 }
 
-int findRowPadding(Picture* picture)
+int findRowPadding(const Picture* picture)
 {
 	int row_padding = (MULTIPLE_4 - (picture->info.Width % MULTIPLE_4)) % MULTIPLE_4;
 
@@ -90,7 +90,32 @@ void ckekerForFormat(Picture ** picture)
 	}
 }
 
-Picture* loadPicture(char* file_name, RGBQUAD** palitr)
+char** giveMemoryForPixels(Picture* picture, RGBQUAD** palitr)
+{
+	char **mas = (unsigned char**)calloc(picture->info.Height, sizeof(unsigned char*));
+	if (mas == NULL)
+	{
+		free(picture);
+		free(palitr);
+		exit(MEMORY_MISTAKE);
+	}
+
+	for (int i = 0; i < (int)picture->info.Height; i++)
+	{
+		mas[i] = (unsigned char*)calloc(picture->info.Width, sizeof(unsigned char));
+
+		if (mas[i] == NULL)
+		{
+			free(picture);
+			free(palitr);
+			exit(MEMORY_MISTAKE);
+		}
+	}
+
+	return mas;
+}
+
+Picture* loadPicture(const char* file_name, RGBQUAD** palitr)
 {
 	FILE* file;
 	errno_t err_file = fopen_s(&file, file_name, "rb");
@@ -129,25 +154,7 @@ Picture* loadPicture(char* file_name, RGBQUAD** palitr)
 		
 			fseek(file, picture->file.DataOffset, SEEK_SET);
 
-			picture->pixel_8 = (unsigned char**)calloc(picture->info.Height, sizeof(unsigned char*));
-			if (picture->pixel_8 == NULL)
-			{
-				free(picture);
-				free(palitr);
-				exit(MEMORY_MISTAKE);
-			}
-
-			for (int i = 0; i < (int)picture->info.Height; i++)
-			{
-				picture->pixel_8[i] = (unsigned char*)calloc(picture->info.Width, sizeof(unsigned char));
-
-				if (picture->pixel_8[i] == NULL)
-				{
-					free(picture);
-					free(palitr);
-					exit(MEMORY_MISTAKE);
-				}
-			}
+			picture->pixel_8 = giveMemoryForPixels(picture, palitr);
 
 			int row_padding = findRowPadding(picture);
 
@@ -197,7 +204,7 @@ Picture* loadPicture(char* file_name, RGBQUAD** palitr)
 	return picture;
 }
 
-void makeFileResult(Picture* picture,char *name, RGBQUAD* palitr)
+void makeFileResult(Picture* picture,const char *name, RGBQUAD* palitr)
 {
 	FILE* file;
 	errno_t err_file = fopen_s(&file, name, "wb");
@@ -257,7 +264,7 @@ void makeFileResult(Picture* picture,char *name, RGBQUAD* palitr)
 				fwrite(&picture->data[i][j].red, sizeof(unsigned char), ONE_TIME, file);
 			}
 
-			unsigned char null_pixel = '\0';
+			int null_pixel = 0;
 			if (row_padding != 0)
 				fwrite(&null_pixel, sizeof(unsigned char), row_padding * NUM_BYTES_IN_PIXEL_24, file);
 		}

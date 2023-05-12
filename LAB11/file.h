@@ -46,11 +46,11 @@ typedef struct tagRGBQUAD
 
 #pragma pack(pop)
 
-Picture* loadPicture(char* file_name, RGBQUAD** palitr);
+Picture* loadPicture(const char* file_name, RGBQUAD** palitr);
 
 void freePicture(Picture** picture);
 
-void makeFileResult(Picture* picture, char* name, RGBQUAD* palitr);
+void makeFileResult(Picture* picture,const char* name, RGBQUAD* palitr);
 
 char* inputFileName();
 
@@ -58,6 +58,6 @@ void ckekerForFormat(Picture** picture);
 
 void chekerForFileInFolder(char** file_name);
 
-int findRowPadding(Picture* picture);
+int findRowPadding(const Picture* picture);
 
 void makeMasOfPixels(FILE* file, Picture** picture);
