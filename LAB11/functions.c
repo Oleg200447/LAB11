@@ -248,7 +248,7 @@ void makeGammaCorrection(const Picture* picture, int gamma_value, RGBQUAD** pali
 
 	for (int i = 0; i < SIZE_OF_PALITR; i++)
 	{
-		double sqrt_number = sqrt((i / MAX_ID), gamma_value);
+		double sqrt_number = sqrt(((double)i / MAX_ID), gamma_value);
 		mas_values[i] =(sqrt_number* MAX_ID);
 	}
 

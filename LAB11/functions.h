@@ -1,9 +1,9 @@
 #pragma once
 
-void makePictureNegative(Picture* picture, RGBQUAD** palitr);
+void makePictureNegative(const Picture* picture, RGBQUAD** palitr);
 
-void makePictureWhiteAndBlack(Picture* picture, RGBQUAD** palitr);
+void makePictureWhiteAndBlack(const Picture* picture, RGBQUAD** palitr);
 
 void makeMedianFiltration(Picture* picture,int x_time, RGBQUAD* palitr);
 
-void makeGammaCorrection(Picture* picture, int gamma_value, RGBQUAD** palitr);
+void makeGammaCorrection(const Picture* picture, int gamma_value, RGBQUAD** palitr);
