@@ -83,9 +83,9 @@ void makePictureWhiteAndBlack(const Picture* picture, RGBQUAD** palitr)
 				int g = (int)picture->data[i][j].green;
 				int r = (int)picture->data[i][j].red;
 			
-				picture->data[i][j].blue = 0.2989 * r + 0.5870 * g + 0.1140 * b;
-				picture->data[i][j].green = 0.2989 * r + 0.5870 * g + 0.1140 * b;
-				picture->data[i][j].red = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+				picture->data[i][j].blue =(unsigned char)(0.2989 * r + 0.5870 * g + 0.1140 * b);
+				picture->data[i][j].green = (unsigned char)(0.2989 * r + 0.5870 * g + 0.1140 * b);
+				picture->data[i][j].red = (unsigned char)(0.2989 * r + 0.5870 * g + 0.1140 * b);
 				
 			}
 		break;
@@ -94,6 +94,88 @@ void makePictureWhiteAndBlack(const Picture* picture, RGBQUAD** palitr)
 	}
 }
 
+void giveColoursNewValueEightBits(Picture* picture, unsigned char** temp_mas_palitr)
+{
+	for (unsigned int i = 1; i < picture->info.Height - 1; i++)
+		for (unsigned int j = 1; j < picture->info.Width - 1; j++)
+		{
+			picture->pixel_8[i][j] = temp_mas_palitr[i - 1][j - 1];
+		}
+}
+
+void makeMedianFiltrationOfOneStringEightBit(RGBQUAD* palitr, Picture* picture,int i, unsigned char** temp_mas_palitr)
+{
+
+	for (unsigned int j = 1; j < picture->info.Width - 1; j++)
+	{
+
+		int sum_b = 0;
+		int sum_g = 0;
+		int sum_r = 0;
+
+		for (int k = -1; k < 2; k++)
+			for (int o = -1; o < 2; o++)
+			{
+
+				sum_b += (int)palitr[picture->pixel_8[i + k][j + o]].rgbBlue;
+				sum_g += (int)palitr[picture->pixel_8[i + k][j + o]].rgbGreen;
+				sum_r += (int)palitr[picture->pixel_8[i + k][j + o]].rgbRed;
+			}
+
+		unsigned char new_b = (unsigned char)(sum_b / 8);
+		unsigned char new_g = (unsigned char)(sum_g / 8);
+		unsigned char new_r = (unsigned char)(sum_r / 8);
+
+		unsigned char new_id = 0;
+
+		int similarity = (findSubModule((int)palitr[0].rgbBlue, (int)new_b) + findSubModule((int)palitr[0].rgbGreen, (int)new_g) + findSubModule((int)palitr[0].rgbRed, (int)new_r));
+
+		for (int k = 0; k < SIZE_OF_PALITR; k++)
+		{
+			int similarity_now = (findSubModule((int)palitr[k].rgbBlue, (int)new_b) + findSubModule((int)palitr[k].rgbGreen, (int)new_g) + findSubModule((int)palitr[k].rgbRed, (int)new_r));
+			if (similarity_now < similarity)
+			{
+				new_id = (unsigned char)k;
+				similarity = similarity_now;
+			}
+		}
+
+		temp_mas_palitr[i - 1][j - 1] = new_id;
+	}
+}
+
+void giveColoursNewValueTwentyFourBits(Picture** picture, pixel_24*** temp_mas)
+{
+	for (unsigned int i = 1; i < (*picture)->info.Height - 1; i++)
+		for (unsigned int j = 1; j < (*picture)->info.Width - 1; j++)
+		{
+			(*picture)->data[i][j].blue = (*temp_mas)[i - 1][j - 1].blue;
+			(*picture)->data[i][j].green = (*temp_mas)[i - 1][j - 1].green;
+			(*picture)->data[i][j].red = (*temp_mas)[i - 1][j - 1].red;
+		}
+}
+
+void makeMedianFiltrationOfOneStringTwentyFourBit(Picture** picture, int i, pixel_24*** temp_mas)
+{
+	for (unsigned int j = 1; j < (*picture)->info.Width - 1; j++)
+	{
+		int sum_b = 0;
+		int sum_g = 0;
+		int sum_r = 0;
+
+		for (int k = -1; k < 2; k++)
+			for (int o = -1; o < 2; o++)
+			{
+				sum_b += (int)(*picture)->data[i + k][j + o].blue;
+				sum_g += (int)(*picture)->data[i + k][j + o].green;
+				sum_r += (int)(*picture)->data[i + k][j + o].red;
+			}
+
+		(*temp_mas)[i - 1][j - 1].blue = (unsigned char)(sum_b / 9);
+		(*temp_mas)[i - 1][j - 1].green = (unsigned char)(sum_g / 9);
+		(*temp_mas)[i - 1][j - 1].red = (unsigned char)(sum_r / 9);
+	}
+}
 
 
 void makeMedianFiltration(Picture* picture, int x_time, RGBQUAD* palitr)
@@ -130,50 +212,9 @@ void makeMedianFiltration(Picture* picture, int x_time, RGBQUAD* palitr)
 		for (int s = 0; s < x_time; s++)
 		{
 			for (unsigned int i = 1; i < picture->info.Height - 1; i++)
-				for (unsigned int j = 1; j < picture->info.Width - 1; j++)
-				{
+				makeMedianFiltrationOfOneStringEightBit(palitr, picture, i, temp_mas_palitr);
 
-					int sum_b = 0;
-					int sum_g = 0;
-					int sum_r = 0;
-
-					for (int k = -1; k < 2; k++)
-						for (int o = -1; o < 2; o++)
-						{
-							if (k != 0 || o != 0)
-							{
-								sum_b += (int)palitr[picture->pixel_8[i + k][j + o]].rgbBlue;
-								sum_g += (int)palitr[picture->pixel_8[i + k][j + o]].rgbGreen;
-								sum_r += (int)palitr[picture->pixel_8[i + k][j + o]].rgbRed;
-							}
-						}
-
-					unsigned char new_b = (unsigned char)(sum_b / 8);
-					unsigned char new_g = (unsigned char)(sum_g / 8);
-					unsigned char new_r = (unsigned char)(sum_r / 8);
-
-					unsigned char new_id = 0;
-
-					int similarity = (findSubModule((int)palitr[0].rgbBlue, (int)new_b) + findSubModule((int)palitr[0].rgbGreen, (int)new_g) + findSubModule((int)palitr[0].rgbRed, (int)new_r));
-
-					for (int k = 0; k < SIZE_OF_PALITR; k++)
-					{
-						int similarity_now = (findSubModule((int)palitr[k].rgbBlue, (int)new_b) + findSubModule((int)palitr[k].rgbGreen, (int)new_g) + findSubModule((int)palitr[k].rgbRed, (int)new_r));
-						if (similarity_now < similarity)
-						{
-							new_id = (unsigned char)k;
-							similarity = similarity_now;
-						}
-					}
-
-					temp_mas_palitr[i-1][j-1] = new_id;
-				}
-
-			for (unsigned int i = 1; i < picture->info.Height - 1; i++)
-				for (unsigned int j = 1; j < picture->info.Width - 1; j++)
-				{
-					picture->pixel_8[i][j] = temp_mas_palitr[i - 1][j - 1];
-				}
+			giveColoursNewValueEightBits(picture, temp_mas_palitr);
 		}
 			
 		free(temp_mas_palitr);
@@ -201,35 +242,9 @@ void makeMedianFiltration(Picture* picture, int x_time, RGBQUAD* palitr)
 		for (int s = 0; s < x_time; s++)
 		{
 			for (unsigned int i = 1; i < picture->info.Height - 1; i++)
-				for (unsigned int j = 1; j < picture->info.Width - 1; j++)
-				{
-					int sum_b = 0;
-					int sum_g = 0;
-					int sum_r = 0;
-
-					for (int k = -1; k < 2; k++)
-						for (int o = -1; o < 2; o++)
-						{
-							if (k != 0 || o != 0)
-							{
-								sum_b += (int)picture->data[i + k][j + o].blue;
-								sum_g += (int)picture->data[i + k][j + o].green;
-								sum_r += (int)picture->data[i + k][j + o].red;
-							}
-						}
-
-					temp_mas[i - 1][j - 1].blue = (unsigned char)(sum_b / 8);
-					temp_mas[i - 1][j - 1].green = (unsigned char)(sum_g / 8);
-					temp_mas[i - 1][j - 1].red = (unsigned char)(sum_r / 8);
-				}
-
-			for (unsigned int i = 1; i < picture->info.Height - 1; i++)
-				for (unsigned int j = 1; j < picture->info.Width - 1; j++)
-				{
-					picture->data[i][j].blue = temp_mas[i - 1][j - 1].blue;
-					picture->data[i][j].green = temp_mas[i - 1][j - 1].green;
-					picture->data[i][j].red = temp_mas[i - 1][j - 1].red;
-				}
+				makeMedianFiltrationOfOneStringTwentyFourBit(&picture, i, &temp_mas);
+				
+			giveColoursNewValueTwentyFourBits(&picture, &temp_mas);
 		}
 		for (int i = 0; i < (int)picture->info.Height - 2; i++)
 		{
