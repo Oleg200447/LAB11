@@ -50,7 +50,7 @@ Picture* loadPicture(const char* file_name, RGBQUAD** palitr);
 
 void freePicture(Picture** picture);
 
-void makeFileResult(Picture* picture,const char* name, RGBQUAD* palitr);
+void makeFileResult(const Picture* picture,const char* name, RGBQUAD* palitr);
 
 char* inputFileName();
 
