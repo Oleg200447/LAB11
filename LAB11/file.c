@@ -264,7 +264,7 @@ void makeFileResult(const Picture* picture,const char *name, RGBQUAD* palitr)
 				fwrite(&picture->data[i][j].red, sizeof(unsigned char), ONE_TIME, file);
 			}
 
-			unsigned char null_pixel = '\0';
+			unsigned char null_pixel[] = "\0\0\0";
 			if (row_padding != 0)
 				fwrite(&null_pixel, sizeof(unsigned char), row_padding, file);
 		}
