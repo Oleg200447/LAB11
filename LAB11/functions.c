@@ -94,7 +94,7 @@ void makePictureWhiteAndBlack(const Picture* picture, RGBQUAD** palitr)
 	}
 }
 
-void giveColoursNewValueEightBits(Picture* picture, unsigned char** temp_mas_palitr)
+void giveColoursNewValueEightBits(const Picture* picture, unsigned char** temp_mas_palitr)
 {
 	for (unsigned int i = 1; i < picture->info.Height - 1; i++)
 		for (unsigned int j = 1; j < picture->info.Width - 1; j++)
@@ -103,7 +103,7 @@ void giveColoursNewValueEightBits(Picture* picture, unsigned char** temp_mas_pal
 		}
 }
 
-void makeMedianFiltrationOfOneStringEightBit(RGBQUAD* palitr, Picture* picture,int i, unsigned char** temp_mas_palitr)
+void makeMedianFiltrationOfOneStringEightBit(const RGBQUAD* palitr,const Picture* picture,int i, unsigned char** temp_mas_palitr)
 {
 
 	for (unsigned int j = 1; j < picture->info.Width - 1; j++)
@@ -177,6 +177,31 @@ void makeMedianFiltrationOfOneStringTwentyFourBit(Picture** picture, int i, pixe
 	}
 }
 
+char** memoryForTempMas(Picture* picture, RGBQUAD* palitr)
+{
+	char **temp_mas_palitr = (unsigned char**)calloc(picture->info.Height - 2, sizeof(unsigned char*));
+	if (temp_mas_palitr == NULL)
+	{
+		freePicture(&picture);
+		free(palitr);
+		exit(MEMORY_MISTAKE);
+	}
+
+	for (int i = 0; i < (int)picture->info.Height - 2; i++)
+	{
+		*(temp_mas_palitr + i) = (unsigned char*)calloc(picture->info.Width - 2, sizeof(unsigned char));
+
+		if (*(temp_mas_palitr + i) == NULL)
+		{
+			free(temp_mas_palitr);
+			freePicture(&picture);
+			free(palitr);
+			exit(MEMORY_MISTAKE);
+		}
+	}
+
+	return temp_mas_palitr;
+}
 
 void makeMedianFiltration(Picture* picture, int x_time, RGBQUAD* palitr)
 {
@@ -188,26 +213,7 @@ void makeMedianFiltration(Picture* picture, int x_time, RGBQUAD* palitr)
 	{
 	case PIXEL_8:
 
-		temp_mas_palitr = (unsigned char**)calloc(picture->info.Height - 2, sizeof(unsigned char*));
-		if (temp_mas_palitr == NULL)
-		{
-			freePicture(&picture);
-			free(palitr);
-			exit(MEMORY_MISTAKE);
-		}
-
-		for (int i = 0; i <(int) picture->info.Height - 2; i++)
-		{
-			*(temp_mas_palitr + i) = (unsigned char*)calloc(picture->info.Width - 2, sizeof(unsigned char));
-
-			if (*(temp_mas_palitr + i) == NULL)
-			{
-				free(temp_mas_palitr);
-				freePicture(&picture);
-				free(palitr);
-				exit(MEMORY_MISTAKE);
-			}
-		}
+		temp_mas_palitr = memoryForTempMas(picture, palitr);
 
 		for (int s = 0; s < x_time; s++)
 		{
