@@ -37,7 +37,7 @@ void chekerForContinue(int* num)
 	}
 }
 
-void makePictureBlackAndWhiteMenu(Picture* picture,char * file_name)
+void makePictureBlackAndWhiteMenu(Picture* picture,const char * file_name)
 {
 	RGBQUAD* palitr = NULL;
 
@@ -50,7 +50,7 @@ void makePictureBlackAndWhiteMenu(Picture* picture,char * file_name)
 	freePicture(&picture);
 }
 
-void makePictureNegativeMenu(Picture* picture, char* file_name)
+void makePictureNegativeMenu(Picture* picture, const char* file_name)
 {
 	RGBQUAD* palitr = NULL;
 
@@ -63,7 +63,7 @@ void makePictureNegativeMenu(Picture* picture, char* file_name)
 	freePicture(&picture);
 }
 
-void makeMedianFiltrationMenu(Picture* picture, char* file_name)
+void makeMedianFiltrationMenu(Picture* picture,const char* file_name)
 {
 	RGBQUAD* palitr = NULL;
 
@@ -85,7 +85,7 @@ void makeMedianFiltrationMenu(Picture* picture, char* file_name)
 	freePicture(&picture);
 }
 
-void makeGammaCorrectionMenu(Picture* picture, char* file_name)
+void makeGammaCorrectionMenu(Picture* picture, const  char* file_name)
 {
 	RGBQUAD* palitr = NULL;
 
