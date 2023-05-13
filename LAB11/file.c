@@ -37,7 +37,7 @@ char* inputFileName()
 
 	char format[] = ".bmp";
 
-	strcat(file_name, format);
+	strcat_s(file_name,KB, format);
 
 	return file_name;
 }
